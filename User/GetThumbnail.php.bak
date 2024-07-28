@@ -1,6 +1,0 @@
-<?php
-include "../Config.php";
-die(json_encode(array(
-	"Status" => "Ok",
-	"ThumbnailUrl" => "$baseURL/icon.png",
-)));
