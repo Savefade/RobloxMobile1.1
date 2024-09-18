@@ -6,6 +6,9 @@ This project allows you to host a server which works on older version of Roblox 
 
 An in-depth paragraph about your project and overview of use.
 
+## Warning
+Roblox 1.0-1.1.1 is insecure. They send the auth token in the GET request without a hash.
+
 ## Self hosting
 
 * XAMPP with Apache, PHP 8/7 and MySQL installed
