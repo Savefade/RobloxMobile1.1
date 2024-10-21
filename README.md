@@ -3,7 +3,7 @@
 This project allows you to host a server (with all features working) which works on older version of Roblox Mobile (1.0 - 1.1)
 
 ## Warning
-Roblox 1.0-1.1.1 is insecure. They send the auth token in the GET request without a hash.
+Roblox 1.0-1.1.1 is insecure. They send the auth token in the GET request without hashing it.
 
 ## Self hosting
 
