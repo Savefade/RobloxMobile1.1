@@ -4,6 +4,7 @@ This project allows you to host a server (with all features working) which works
 
 ## Warning
 Roblox 1.0-1.1.1 is insecure. They send the auth token in the GET request without hashing it.
+THESE VERSIONS DO NOT INCLUDE GAMES!!!
 
 ## Self hosting
 
