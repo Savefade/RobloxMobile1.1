@@ -1,34 +1,30 @@
 <?php
-include "../Config.php";
+include $_SERVER['DOCUMENT_ROOT'] . "/Config.php";
+include $_SERVER['DOCUMENT_ROOT'] . "/Libraries/Middleware.php";
 
-if(isset($_GET["auth_token"])){
-	$DBReq = $RetrieveDBData->prepare("SELECT * FROM users WHERE AuthToken = ? LIMIT 1;");
-    $DBReq->bind_param("s", $_GET["auth_token"]); //this gets the username from the get request and sends the placeholder (?) to the username. sanitised
-    $DBReq->execute();
-	$DBResult = $DBReq->get_result();
-	if($DBResult->num_rows == 0)
-		returnError();
-	
-	$GetFromDB = $DBResult->fetch_assoc();
-	//
-	if(empty($GetFromDB["FriendUsernames"]))
-		returnFriendJson(array());
-	//
-	$friendsArray = explode(",", $GetFromDB["FriendUsernames"]); 
-	$convertedFriendsArray = array();
-    //
-	foreach($friendsArray as $getFriendContent){
-		$convertedFriendsArray[] = array(
-		'Name' => $getFriendContent["Username"],
+$GetFromDB = checkSession();
+
+$bestFriendsArray = getBestFriendsArray($GetFromDB["Username"]);
+$convertedBestFriendsArray = array();
+foreach($bestFriendsArray as $getFriendContent){
+	if(!empty($getFriendContent)){
+		$convertedBestFriendsArray[] = array(
+			'Name' => $getFriendContent["ToUsername"],
 		);
 	}
 }
+die(json_encode(array('Friends' => $convertedBestFriendsArray,)));
 
-function returnError(){
-	die('"error"'); // this returns some json which causes the incorrect username or password to appear
-}
-
-function returnFriendJson($friendsArray){
-	die(json_encode(array('Friends' => $friendsArray)));
+function getBestFriendsArray($fromUsername){
+	include $_SERVER['DOCUMENT_ROOT'] . "/Config.php";
+	$DBReq = $RetrieveDBData->prepare("SELECT ToUsername, COUNT(*) c FROM messages WHERE FromUsername = ? GROUP BY ToUsername HAVING c >= $messagesSentBeforeBestFriends;");
+    $DBReq->bind_param("s", $fromUsername); //this gets the username from the get request and sends the placeholder (?) to the username. sanitised
+    $DBReq->execute();
+	$DBResult = $DBReq->get_result();
+	$bestFriendsArray = array();
+	while($bestfriend = $DBResult->fetch_assoc()){
+		$bestFriendsArray[] = $bestfriend;
+	}
+	return $bestFriendsArray;
 }
 ?>

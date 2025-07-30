@@ -1,26 +1,17 @@
 <?php
-include "../Config.php";
+include $_SERVER['DOCUMENT_ROOT'] . "/Config.php";
+include $_SERVER['DOCUMENT_ROOT'] . "/Libraries/Middleware.php";
 
-if(isset($_GET["auth_token"]) && isset($_GET["id"])){
-	$DBReq = $RetrieveDBData->prepare("SELECT * FROM users WHERE AuthToken = ? LIMIT 1;");
-    $DBReq->bind_param("s", $_GET["auth_token"]); //this gets the username from the get request and sends the placeholder (?) to the username. sanitised
-    $DBReq->execute();
-	$DBResult = $DBReq->get_result();
-	if($DBResult->num_rows == 0)
-		returnError();
-	
-	$GetFromDB = $DBResult->fetch_assoc();
-	markAsRead($GetFromDB["Username"]);
-	
-	//the token has to be 38 bytes in size (including "") else an error will be returned to the user
+if(!isset($_GET["id"])){
+	exit;
 }
 
-function returnError(){
-	die('"error"'); // this returns some json which causes the incorrect username or password to appear
-}
+$GetFromDB = checkSession();
+
+markAsRead($GetFromDB["Username"]);
 
 function markAsRead($toUsername){
-	include "../Config.php";
+	include $_SERVER['DOCUMENT_ROOT'] . "/Config.php";
 	$DBReq = $RetrieveDBData->prepare("UPDATE messages SET IsRead = 1 WHERE ToUsername = ? && ID = ?");
     $DBReq->bind_param("ss", $toUsername, $_GET["id"]); //this gets the username from the get request and sends the placeholder (?) to the username. sanitised
     $DBReq->execute();

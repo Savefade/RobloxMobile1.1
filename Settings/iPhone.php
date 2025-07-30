@@ -1,6 +1,9 @@
 <?php
-include "../Config.php";
+include $_SERVER['DOCUMENT_ROOT'] . "/Config.php";
+
 if($buildersClubTabEnabled){
 	die("true");
-}else{die("false");}
+}
+
+die("false");
 

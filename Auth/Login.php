@@ -1,8 +1,8 @@
 <?php
-include "../Config.php";
+include $_SERVER['DOCUMENT_ROOT'] . "/Config.php";
 
 if(isset($_GET["username"]) && isset($_GET["password"])){
-	$DBReq = $RetrieveDBData->prepare("SELECT * FROM users WHERE Username = ? LIMIT 1;");
+	$DBReq = $RetrieveDBData->prepare("SELECT * FROM users WHERE Username = ? && BanNote = '' LIMIT 1;");
     $DBReq->bind_param("s", $_GET["username"]); //this gets the username from the get request and sends the placeholder (?) to the username. sanitised
     $DBReq->execute();
 	$DBResult = $DBReq->get_result();
@@ -13,7 +13,7 @@ if(isset($_GET["username"]) && isset($_GET["password"])){
 	$GetFromDB = $DBResult->fetch_assoc();
 	$salt = $GetFromDB["Salt"];
 	//
-	if(!password_verify($salt . $_GET["password"] . $salt, $GetFromDB["Password"]) || !$forceLogin)
+	if(!password_verify($salt . $_GET["password"] . $salt, $GetFromDB["Password"]) || $forceLogin)
 		returnError();
 	//
     $genToken = bin2hex(random_bytes(18));
@@ -27,7 +27,7 @@ function returnError(){
 }
 
 function updateToken($token){
-	include "../Config.php";
+	include $_SERVER['DOCUMENT_ROOT'] . "/Config.php";
 	$DBReq = $RetrieveDBData->prepare("UPDATE users SET AuthToken = ? WHERE Username = ? LIMIT 1;");
     $DBReq->bind_param("ss", $token, $_GET["username"]); //this gets the username from the get request and sends the placeholder (?) to the username. sanitised
     $DBReq->execute();

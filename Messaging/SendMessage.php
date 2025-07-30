@@ -1,26 +1,21 @@
 <?php
-include "../Config.php";
+include $_SERVER['DOCUMENT_ROOT'] . "/Config.php";
+include $_SERVER['DOCUMENT_ROOT'] . "/Libraries/Middleware.php";
+include $_SERVER['DOCUMENT_ROOT'] . "/Libraries/Actions.php";
 
-if(isset($_GET["auth_token"]) && isset($_GET["sendToUser"]) && isset($_GET["subject"]) && isset($_GET["message"])){
-	$DBReq = $RetrieveDBData->prepare("SELECT * FROM users WHERE AuthToken = ? LIMIT 1;");
-    $DBReq->bind_param("s", $_GET["auth_token"]); //this gets the username from the get request and sends the placeholder (?) to the username. sanitised
-    $DBReq->execute();
-	$DBResult = $DBReq->get_result();
-	if($DBResult->num_rows == 0)
-		returnError();
-	
-	$GetFromDB = $DBResult->fetch_assoc();
-	$messagesArray = sendMessage($_GET["sendToUser"], $_GET["subject"], $_GET["message"],$GetFromDB["Username"]);
-	$requestedMessage2Send = array();
-    //
+if(!isset($_GET["sendToUser"]) || !isset($_GET["subject"]) || !isset($_GET["message"])){
+	exit;
 }
 
-function returnError(){
-	die('"error"'); // this returns some json which causes the incorrect username or password to appear
-}
+$GetFromDB = checkSession();
+
+doAfterSendMessage($GetFromDB["Username"], $_GET["sendToUser"], $_GET["subject"], $_GET["message"]);
+
+$messagesArray = sendMessage($_GET["sendToUser"], $_GET["subject"], $_GET["message"],$GetFromDB["Username"]);
+$requestedMessage2Send = array();
 
 function sendMessage($toUsername, $subject, $message, $fromUsername){
-	include "../Config.php";
+	include $_SERVER['DOCUMENT_ROOT'] . "/Config.php";
 	$timestamp = time();
 	$DBReq = $RetrieveDBData->prepare("INSERT INTO `messages` (`ID`, `ToUsername`, `FromUsername`, `Subject`, `Message`, `IsRead`, `SendTS`) VALUES (NULL, ?, ?, ?, ?, '0', $timestamp); ");
     $DBReq->bind_param("ssss", $toUsername, $fromUsername, $subject, $message); //this gets the username from the get request and sends the placeholder (?) to the username. sanitised
